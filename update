@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# Update a Jekyll post's date.
+#
+# P.S.: the `date` command is *lovely*. formatting is simply ezpz.
+#
+
+# regex pattern to look for
+# the first line containing this is replaced with the current datetime
+pattern="^date:"
+
+if [ ! -f "$1" ]; then
+    echo "error: not a file"
+    exit 1
+fi
+
+file="$1"
+
+# check for frontmatter separator line
+if [ "$(head -n1 "$file")" != "---" ]; then
+    echo "error: not a Jekyll post (no frontmatter)"
+    exit 2
+fi
+
+old_datetime=$(grep -m1 --color=never "date: " "$file" | cut -d " " --complement -f 1)
+cur_datetime="$(date "+%Y-%m-%d %H:%M:%S")"
+
+sed -i "0,/${pattern}.*/s//date: $cur_datetime/" "$file"
+
+# echo change made
+echo "$old_datetime -> $cur_datetime"
