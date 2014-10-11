@@ -23,9 +23,20 @@ if [ "$(head -n1 "$file")" != "---" ]; then
 fi
 
 old_datetime=$(grep -m1 --color=never "date: " "$file" | cut -d " " --complement -f 1)
-cur_datetime="$(date "+%Y-%m-%d %H:%M:%S")"
+cur_date="$(date "+%Y-%m-%d")"
+cur_time="$(date "+%H:%M:%S")"
 
-sed -i "0,/${pattern}.*/s//date: $cur_datetime/" "$file"
+sed -i "0,/${pattern}.*/s//date: $cur_date $cur_time/" "$file"
 
 # echo change made
-echo "$old_datetime -> $cur_datetime"
+echo "$old_datetime -> $cur_date $cur_time"
+
+# see if the filename needs updating
+old_namedate="$(cut -d "-" -f 1,2,3 <<< "$file")"
+old_nametitle="$(cut -d "-" -f 1,2,3 --complement <<< "$file")"
+if [ "$old_namedate" != "$cur_date" ]; then
+    mv "$file" "$cur_date-$old_nametitle"
+
+    # echo change made
+    echo "$file -> $cur_date-$old_nametitle"
+fi
